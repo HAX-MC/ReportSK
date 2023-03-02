@@ -1,0 +1,116 @@
+#V1.0 MADE MY https://github.com/HAX-MC
+
+on join:
+	if {reports.hacking::%player%} is not set:
+		if {reports.chat::%player%} is not set:
+			if {reports.gameplay::%player%} is not set:
+				set {reports.hacking::%player%} to 0
+				set {reports.chat::%player%} to 0
+				set {reports.gameplay::%player%} to 0
+				set {reports.reason.hacking::%player%} to "None"
+				set {reports.reason.chat::%player%} to "None"
+				set {reports.reason.gameplay::%player%} to "None"
+				stop
+
+options:
+
+	#================================#
+	#Default prefix: &b&lReport &8»&r#
+	#================================#
+	
+	prefix: &b&lReport &8»&r
+	
+	#==============================================================#
+	#Default noperms: &b&lReport &8» &r You can't use this command!#
+	#==============================================================#
+	
+	noperms: &b&lReport &8» &r You can't use this command!
+	
+command /report <offlineplayer> <text>:
+	permission: report.report
+	permission message: {@noperms}
+	usage: {@prefix} /report <player> <reason> - Report a player
+	trigger:
+		if arg 1 is not set:
+			message "{@prefix} /report <player> <reason>"
+		if arg 1 has the permission "report.evade":
+			message "{@prefix} You can't report that person!"
+			stop
+		if arg 1 is "%player%":
+			message "{@prefix} You can't report yourself!"
+			stop
+		else:
+			if arg 2 is not set:
+				message "{@prefix} /report <player> <reason>"
+				stop
+			else:
+				open virtual chest inventory with size 3 named "&b&lReporting &7&n%arg-1%" to player
+				format gui slot 11 of player with redstone named "&c&lHacking" with lore "&7X-ray, Kill Aura, Speed, etc." to close then run player command "/»rchack %arg-1% %arg-2%"
+				format gui slot 13 of player with gold ingot named "&e&lChat Abuse" with lore "&7Verbal Abuse, Spam, Harassment, etc." to close then run player command "/»rcchat %arg-1% %arg-2%"
+				format gui slot 15 of player with emerald named "&a&lGameplay" with lore "&7Bug exploits, glitches, etc." to close then run player command "/»rcgameplay %arg-1% %arg-2%"
+				
+command /reports <offlineplayer> [<text>]:
+	permission: report.staff
+	permission message: {@noperms}
+	usage: {@prefix} /reports <player> - View a player's reports
+	trigger:
+		if arg 1 is not set:
+			message "{@prefix} /reports <player>"
+		if arg 2 is set:
+			if arg 2 is "reset":
+				if player has the permission "report.reset":
+					set {reports.hacking::%arg-1%} to 0
+					set {reports.chat::%arg-1%} to 0
+					set {reports.gameplay::%arg-1%} to 0
+					set {reports.reason.hacking::%arg-1%} to "None"
+					set {reports.reason.chat::%arg-1%} to "None"
+					set {reports.reason.gameplay::%arg-1%} to "None"
+					message "{@prefix} %arg-1%'s reports have been reset"
+					stop
+				else:
+					message "{@prefix} You can't reset a player's reports!"
+					stop
+			else:
+				message "{@prefix} /reports <player> <reset>"
+		else:
+			open virtual chest inventory with size 4 named "&b&lViewing &7&n%arg-1%" to player
+			format gui slot 4 of player with skull of arg-1 named "&b&lReports &8» &7&n%arg-1%" to do nothing
+			format gui slot 11 of player with redstone named "&c&lHacking Reports" with lore "&7Amount &8- &7%{reports.hacking::%arg-1%}%" to do nothing
+			format gui slot 13 of player with gold ingot named "&e&lChat Reports" with lore "&7Amount &8- &7%{reports.chat::%arg-1%}%" to do nothing
+			format gui slot 15 of player with emerald named "&a&lGameplay Reports" with lore "&7Amount &8- &7%{reports.gameplay::%arg-1%}%" to do nothing
+			format gui slot 20 of player with paper named "&d&lRecent Reason" with lore "&7%{reports.reason.hacking::%arg-1%}%" to do nothing
+			format gui slot 22 of player with paper named "&d&lRecent Reason" with lore "&7%{reports.reason.chat::%arg-1%}%" to do nothing
+			format gui slot 24 of player with paper named "&d&lRecent Reason" with lore "&7%{reports.reason.gameplay::%arg-1%}%" to do nothing
+			
+command /»rchack <offlineplayer> <text>:
+	trigger:
+		add 1 to {reports.hacking::%arg-1%}
+		set {reports.reason.hacking::%arg-1%} to "%arg 2%"
+		send "{@prefix} You have reported %arg-1% (reported for %arg-2%)"
+		send "{@prefix} A staff member will look at your report soon! Thank you for reporting!"
+		loop all players:
+			if loop-player has the permission "report.staff":
+				message "{@prefix} %arg-1% has been reported by %player% for %arg-2%" to loop-player
+				stop
+				
+command /»rcchat <offlineplayer> <text>:
+	trigger:
+		add 1 to {reports.chat::%arg-1%}
+		set {reports.reason.chat::%arg-1%} to "%arg 2%"
+		send "{@prefix} You have reported %arg-1% (reported for %arg-2%)"
+		send "{@prefix} A staff member will look at your report soon! Thank you for reporting!"
+		loop all players:
+			if loop-player has the permission "report.staff":
+				message "{@prefix} %arg-1% has been reported by %player% for %arg-2%" to loop-player
+				stop
+				
+command /»rcgameplay <offlineplayer> <text>:
+	trigger:
+		add 1 to {reports.gameplay::%arg-1%}
+		set {reports.reason.gameplay::%arg-1%} to "%arg 2%"
+		send "{@prefix} You have reported %arg-1% (reported for %arg-2%)"
+		send "{@prefix} A staff member will look at your report soon! Thank you for reporting!"
+		loop all players:
+			if loop-player has the permission "report.staff":
+				message "{@prefix} %arg-1% has been reported by %player% for %arg-2%" to loop-player
+				stop
